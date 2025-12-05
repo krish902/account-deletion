@@ -11,7 +11,7 @@
     p.lead{margin:0 0 16px;color:#334155}
     form{display:grid;gap:12px}
     label{font-weight:600;font-size:14px}
-    input,select,textarea{padding:10px;border:1px solid #e6eef5;border-radius:8px;font-size:14px}
+    input,select,textarea{padding:10px;border:1px solid #e6eef5;border-radius:8px;font-size:14px;width:100%;}
     button{background:#ef4444;color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
     .muted{color:#667085;font-size:13px}
     .note{background:#f1f5f9;padding:12px;border-radius:8px}
@@ -26,21 +26,21 @@
     <p class="lead">This page allows users to request permanent deletion of their account and all associated personal data. The deletion is executed <strong>immediately and permanently</strong> when the request is confirmed.</p>
 
     <div class="important">
-      <strong>Important:</strong> Once deletion completes, <u>all personal data is permanently removed</u> and cannot be recovered. This is intended to meet strict privacy requirements.</div>
+      <strong>Important:</strong> Once deletion completes, <u>all personal data is permanently removed</u> and cannot be recovered.</div>
 
     <h3>How deletion works</h3>
     <div class="note">
       <ul>
-        <li>When you confirm deletion, the system will <strong>immediately and permanently remove</strong> the following data from our production database and backups (where feasible):</li>
+        <li>When you confirm deletion, the system will <strong>immediately and permanently remove</strong> the following data:</li>
         <ul>
-          <li>Personal identifiers: full name, display name, email address, mobile prefix and mobile number, profile photo</li>
-          <li>Authentication data: password hash, OTPs, reset tokens and related credentials</li>
+          <li>Personal identifiers: full name, display name, email, mobile prefix & number, profile photo</li>
+          <li>Authentication data: password hash, OTPs, reset tokens</li>
           <li>Profile fields: village, city, state, country, occupation, blood group, gender, DOB, age</li>
-          <li>Family relations: familyHeadId, parentId — links will be removed; family members will remain but their references to the deleted account will be cleared</li>
+          <li>Family relations: familyHeadId, parentId — links will be removed; family members remain but references cleared</li>
           <li>Device & session data: device tokens, active sessions, push tokens</li>
-          <li>Sensitive records: payment identifiers, saved card/token references (transaction history summaries may be kept in anonymized form for legal compliance, see note below)</li>
+          <li>Sensitive records: payment identifiers, saved card/token references (transaction history summaries may be kept anonymized)</li>
         </ul>
-        <li>After deletion, the user record will not remain searchable or usable for login, and the same credentials will be available to re-register unless otherwise restricted by policy.</li>
+        <li>After deletion, the user record will not remain searchable or usable for login.</li>
       </ul>
     </div>
 
@@ -77,11 +77,12 @@
     </form>
 
     <h3>Retention & backups</h3>
-    <p class="muted">We will delete your data from the production database immediately. For operational backups, we will securely purge or overwrite deleted personal data at the next backup cycle where feasible. We do not retain personally identifiable information after deletion. If any anonymized audit logs are retained for legal reasons, they will not contain identifiable personal data and will be retained for no longer than <strong>1 year</strong>.</p>
+    <p class="muted">We will delete your data from the production database immediately. Operational backups will be securely purged at the next backup cycle. Anonymized audit logs may be retained for legal reasons for no longer than <strong>1 year</strong>.</p>
 
     <script>
       document.getElementById('deleteForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+
         const mobilePrefix = document.getElementById('mobilePrefix').value.trim();
         const mobileNumber = document.getElementById('mobileNumber').value.trim();
         const email = document.getElementById('email').value.trim();
@@ -92,26 +93,29 @@
         if (!confirm) return alert('Please confirm permanent deletion');
 
         try {
-          const res = await fetch('/api/v1/user/delete-account-request', {
+          const res = await fetch('https://account-deletion-req.vercel.app/api/v1/user/delete-account-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mobilePrefix, mobileNumber, email, reason, confirm })
           });
+
           const data = await res.json();
+
           if (data.success) {
             alert(data.msg || 'Account permanently deleted');
+            window.location.href = '/'; 
           } else {
             alert(data.msg || 'Server response: ' + JSON.stringify(data));
           }
         } catch (err) {
           console.error(err);
-          alert('Network error');
+          alert('Network error, please try again later');
         }
       });
     </script>
 
     <h3>Contact</h3>
-    <p class="muted">If you have questions about deletion, contact: <strong>bhikadiyaparivar.org@gmail.com</strong></p>
+    <p class="muted">For questions about deletion, contact: <strong>bhikadiyaparivar.org@gmail.com</strong></p>
 
   </div>
 </body>
